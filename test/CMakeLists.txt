@@ -1,12 +1,18 @@
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
-set(REQUIRED_LIBS soa)
+list(APPEND REQUIRED_FILES)
+list(APPEND REQUIRED_INCLUDES)
+list(APPEND REQUIRED_LIBS cards)
+list(APPEND REQUIRED_FEATURES cxx_std_17)
+list(APPEND REQUIRED_OPTIONS -Wall -Wextra -Wpedantic -O3)
 
 function(add_boost_test SOURCE_FILE_NAME)
     get_filename_component(TEST_EXECUTABLE_NAME ${SOURCE_FILE_NAME} NAME_WE)
 
-    add_executable(${TEST_EXECUTABLE_NAME} ${SOURCE_FILE_NAME})
-    target_link_libraries(${TEST_EXECUTABLE_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${REQUIRED_LIBS})
+    add_executable(${TEST_EXECUTABLE_NAME} ${SOURCE_FILE_NAME} ${REQUIRED_FILES})
+    target_link_libraries(${TEST_EXECUTABLE_NAME} PRIVATE ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${REQUIRED_LIBS})
+    target_compile_features(${TEST_EXECUTABLE_NAME} PRIVATE ${REQUIRED_FEATURES})
+    target_compile_options(${TEST_EXECUTABLE_NAME} PRIVATE ${REQUIRED_OPTIONS})
 
     file(READ "${SOURCE_FILE_NAME}" SOURCE_FILE_CONTENTS)
     string(REGEX MATCHALL "BOOST_AUTO_TEST_CASE\\( *([A-Za-z_0-9]+) *\\)"
@@ -21,9 +27,4 @@ function(add_boost_test SOURCE_FILE_NAME)
     endforeach()
 endfunction()
 
-#add_boost_test(soa-test.cpp)
-
-# Dummy compile test for now
-add_executable(dummy main.cpp)
-target_link_libraries(dummy soa)
-add_test(NAME dummy COMMAND dummy)
+add_boost_test(soa-tests.cpp)
