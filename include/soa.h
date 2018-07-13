@@ -27,9 +27,13 @@ namespace soa {
         using const_pointer = std::tuple<const Ts*...>;
         using indices = std::index_sequence_for<Ts...>;
 
-
         template <size_type I>
         auto get() {
+            return std::get<I>(vecs_);
+        }
+
+        template <size_type I>
+        const auto& get() const {
             return std::get<I>(vecs_);
         }
 
@@ -51,8 +55,8 @@ namespace soa {
                 indices{});
         }
 
-        size_type size() { return std::get<0>(vecs_).size(); }
-        bool empty() { return size() == 0; }
+        size_type size() const { return std::get<0>(vecs_).size(); }
+        bool empty() const { return size() == 0; }
 
         void reserve(size_type size) {
             tuple_apply([this, size](auto... Is) { (std::get<Is>(vecs_).reserve(size), ...); },
