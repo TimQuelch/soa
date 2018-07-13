@@ -8,19 +8,10 @@
 
 #include "soa.h"
 
-template <typename Func, std::size_t... Is>
-constexpr auto tuple_apply(Func&& f, std::index_sequence<Is...>) {
-    return f(std::integral_constant<std::size_t, Is>{}...);
-}
-
-template <typename... Ts>
-std::ostream& operator<<(std::ostream os, std::tuple<Ts...> val) {
-    os << "{ ";
-    tuple_apply([&val](auto... Is) { ((std::cout << std::get<Is> << " "), ...); },
-                std::index_sequence_for<Ts...>{});
-    os << "}";
-    return os;
-}
+using tuple_log1 = std::tuple<int&, double&>;
+using tuple_log2 = std::tuple<int, double>;
+BOOST_TEST_DONT_PRINT_LOG_VALUE(tuple_log1);
+BOOST_TEST_DONT_PRINT_LOG_VALUE(tuple_log2);
 
 BOOST_AUTO_TEST_CASE(default_constructor) {
     auto i = soa::soa<int>{};
