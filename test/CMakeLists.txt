@@ -2,9 +2,9 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 list(APPEND REQUIRED_FILES)
 list(APPEND REQUIRED_INCLUDES)
-list(APPEND REQUIRED_LIBS cards)
-list(APPEND REQUIRED_FEATURES cxx_std_17)
-list(APPEND REQUIRED_OPTIONS -Wall -Wextra -Wpedantic -O3)
+list(APPEND REQUIRED_LIBS soa)
+list(APPEND REQUIRED_FEATURES)
+list(APPEND REQUIRED_OPTIONS -Wall -Wextra -Wpedantic -O2)
 
 function(add_boost_test SOURCE_FILE_NAME)
     get_filename_component(TEST_EXECUTABLE_NAME ${SOURCE_FILE_NAME} NAME_WE)
