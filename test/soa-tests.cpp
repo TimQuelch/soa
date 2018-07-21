@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(get) {
     auto v1 = s.get<0>();
     auto v2 = s.get<1>();
 
-    static_assert(std::is_same_v<decltype(s.get<0>()), std::vector<int>>);
-    static_assert(std::is_same_v<decltype(s.get<1>()), std::vector<double>>);
+    static_assert(std::is_same_v<decltype(s.get<0>()), std::vector<int>&>);
+    static_assert(std::is_same_v<decltype(s.get<1>()), std::vector<double>&>);
     static_assert(std::is_same_v<decltype(cs.get<0>()), const std::vector<int>&>);
     static_assert(std::is_same_v<decltype(cs.get<1>()), const std::vector<double>&>);
 

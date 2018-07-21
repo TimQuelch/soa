@@ -27,7 +27,7 @@ namespace soa {
         using const_pointer = std::tuple<const Ts*...>;
 
         template <size_type I>
-        auto get() {
+        auto& get() {
             return std::get<I>(vecs_);
         }
 
