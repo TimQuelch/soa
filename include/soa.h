@@ -156,7 +156,8 @@ namespace soa {
                 return *this;
             }
 
-            friend iterator_impl<Const> operator+(iterator_impl<Const> a, difference_type b) {
+            friend iterator_impl<Const> operator+(const iterator_impl<Const>& a,
+                                                  difference_type b) {
                 return a += b;
             }
 
@@ -166,35 +167,37 @@ namespace soa {
                 return *this;
             }
 
-            friend iterator_impl<Const> operator-(iterator_impl<Const> a, difference_type b) {
+            friend iterator_impl<Const> operator-(const iterator_impl<Const>& a,
+                                                  difference_type b) {
                 return a -= b;
             }
 
-            friend difference_type operator-(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend difference_type operator-(const iterator_impl<Const>& a,
+                                             const iterator_impl<Const>& b) {
                 return std::get<0>(a.ptrs_) - std::get<0>(b.ptrs_);
             }
 
-            friend bool operator==(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator==(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return std::get<0>(a.ptrs_) == std::get<0>(b.ptrs_);
             }
 
-            friend bool operator!=(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator!=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return !(a == b);
             }
 
-            friend bool operator<(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator<(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return std::get<0>(a.ptrs_) < std::get<0>(b.ptrs_);
             }
 
-            friend bool operator<(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator<(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return std::get<0>(a.ptrs_) > std::get<0>(b.ptrs_);
             }
 
-            friend bool operator<=(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator<=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return !(a > b);
             }
 
-            friend bool operator>=(iterator_impl<Const> a, iterator_impl<Const> b) {
+            friend bool operator>=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
                 return !(a < b);
             }
 
