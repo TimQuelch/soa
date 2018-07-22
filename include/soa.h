@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/iterator/iterator_facade.hpp>
+
 namespace soa {
     namespace {
         template <typename Func, std::size_t... Is>
@@ -27,8 +29,6 @@ namespace soa {
         using difference_type = std::ptrdiff_t;
         using reference = std::tuple<Ts&...>;
         using const_reference = std::tuple<const Ts&...>;
-        using pointer = std::tuple<Ts*...>;
-        using const_pointer = std::tuple<const Ts*...>;
         using iterator = iterator_impl<false>;
         using const_iterator = iterator_impl<true>;
 
@@ -73,28 +73,20 @@ namespace soa {
             tuple_apply([this](auto... Is) { (std::get<Is>(vecs_).pop_back(), ...); });
         }
 
-        auto begin() {
-            return tuple_apply(
-                [this](auto... Is) { return iterator{pointer{vecs_[Is].begin()...}}; });
+        auto begin() const {
+            return tuple_apply([this](auto... Is) { return iterator{vecs_[Is].begin()...}; });
         }
-
-        auto begin() const { return cbegin(); }
 
         auto cbegin() const {
-            return tuple_apply(
-                [this](auto... Is) { return const_iterator{pointer{vecs_[Is].begin()...}}; });
+            return tuple_apply([this](auto... Is) { return const_iterator{vecs_[Is].begin()...}; });
         }
 
-        auto end() {
-            return tuple_apply(
-                [this](auto... Is) { return iterator{pointer{vecs_[Is].end()...}}; });
+        auto end() const {
+            return tuple_apply([this](auto... Is) { return iterator{vecs_[Is].end()...}; });
         }
-
-        auto end() const { return cend(); }
 
         auto cend() const {
-            return tuple_apply(
-                [this](auto... Is) { return const_iterator{pointer{vecs_[Is].end()...}}; });
+            return tuple_apply([this](auto... Is) { return const_iterator{vecs_[Is].end()...}; });
         }
 
     private:
@@ -106,103 +98,60 @@ namespace soa {
         }
 
         template <bool Const>
-        class iterator_impl {
+        class iterator_impl
+            : public boost::iterator_facade<iterator_impl<Const>,
+                                            value_type,
+                                            boost::random_access_traversal_tag,
+                                            std::conditional_t<Const, const_reference, reference>,
+                                            difference_type> {
         public:
-            using value_type = value_type;
-            using difference_type = difference_type;
-            using reference = typename std::conditional_t<Const, const_reference, reference>;
-            using pointer = typename std::conditional_t<Const, const_pointer, pointer>;
-            using iterator_category = std::random_access_iterator_tag;
+            using vec_iterators =
+                std::conditional_t<Const,
+                                   std::tuple<typename std::vector<Ts>::const_iterator...>,
+                                   std::tuple<typename std::vector<Ts>::iterator...>>;
 
-            iterator_impl(pointer val) { ptrs_ = std::move(val); }
+            using reference =
+                std::conditional_t<Const, soa<Ts...>::const_reference, soa<Ts...>::reference>;
 
-            template <typename std::enable_if_t<Const>>
-            reference operator*() const {
-                return soa<Ts...>::tuple_apply(
-                    [this](auto... Is) { return reference{*std::get<Is>(ptrs_)...}; });
-            }
+            iterator_impl(vec_iterators its)
+                : its_{std::move(its)} {}
 
-            template <typename std::enable_if_t<!Const>>
-            reference operator*() {
-                return soa<Ts...>::tuple_apply(
-                    [this](auto... Is) { return reference{*std::get<Is>(ptrs_)...}; });
-            }
+            template <bool Const_>
+            iterator_impl(iterator_impl<Const_> other)
+                : its_{std::move(other.its_)} {}
 
-            iterator_impl<Const>& operator++() {
-                soa<Ts...>::tuple_apply([this](auto... Is) { (++std::get<Is>(ptrs_), ...); });
-                return *this;
-            }
-
-            iterator_impl<Const> operator++(int) {
-                auto tmp = *this;
-                operator++();
-                return tmp;
-            }
-
-            iterator_impl<Const>& operator--() {
-                soa<Ts...>::tuple_apply([this](auto... Is) { (--std::get<Is>(ptrs_), ...); });
-                return *this;
-            }
-
-            iterator_impl<Const> operator--(int) {
-                auto tmp = *this;
-                operator--();
-                return tmp;
-            }
-
-            iterator_impl<Const>& operator+=(difference_type n) {
-                soa<Ts...>::tuple_apply(
-                    [this, n](auto... Is) { ((void)(std::get<Is>(ptrs_) += n), ...); });
-                return *this;
-            }
-
-            friend iterator_impl<Const> operator+(const iterator_impl<Const>& a,
-                                                  difference_type b) {
-                return a += b;
-            }
-
-            iterator_impl<Const>& operator-=(difference_type n) {
-                soa<Ts...>::tuple_apply(
-                    [this, n](auto... Is) { ((void)(std::get<Is>(ptrs_) -= n), ...); });
-                return *this;
-            }
-
-            friend iterator_impl<Const> operator-(const iterator_impl<Const>& a,
-                                                  difference_type b) {
-                return a -= b;
-            }
-
-            friend difference_type operator-(const iterator_impl<Const>& a,
-                                             const iterator_impl<Const>& b) {
-                return std::get<0>(a.ptrs_) - std::get<0>(b.ptrs_);
-            }
-
-            friend bool operator==(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return std::get<0>(a.ptrs_) == std::get<0>(b.ptrs_);
-            }
-
-            friend bool operator!=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return !(a == b);
-            }
-
-            friend bool operator<(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return std::get<0>(a.ptrs_) < std::get<0>(b.ptrs_);
-            }
-
-            friend bool operator<(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return std::get<0>(a.ptrs_) > std::get<0>(b.ptrs_);
-            }
-
-            friend bool operator<=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return !(a > b);
-            }
-
-            friend bool operator>=(const iterator_impl<Const>& a, const iterator_impl<Const>& b) {
-                return !(a < b);
-            }
+            iterator_impl() = default;
 
         private:
-            pointer ptrs_ = {};
+            reference dereference() const {
+                return soa<Ts...>::tuple_apply(
+                    [this](auto... Is) { return reference{*std::get<Is>(its_)...}; });
+            }
+
+            void increment() {
+                soa<Ts...>::tuple_apply([this](auto... Is) { (++std::get<Is>(its_), ...); });
+            }
+
+            void decrement() {
+                soa<Ts...>::tuple_apply([this](auto... Is) { (--std::get<Is>(its_), ...); });
+            }
+
+            void advance(difference_type n) {
+                soa<Ts...>::tuple_apply(
+                    [this, n](auto... Is) { (static_cast<void>(std::get<Is>(its_) += n), ...); });
+            }
+
+            template <bool Const_>
+            difference_type distance_to(const iterator_impl<Const_>& other) const {
+                return std::get<0>(other.its_) - std::get<0>(its_);
+            }
+
+            template <bool Const_>
+            bool equal(const iterator_impl<Const_>& other) const {
+                return std::get<0>(its_) == std::get<0>(other.its_);
+            }
+
+            vec_iterators its_ = {};
         };
     };
 } // namespace soa
