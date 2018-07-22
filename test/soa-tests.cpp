@@ -110,3 +110,10 @@ BOOST_AUTO_TEST_CASE(array_access) {
     BOOST_TEST(s[1] == std::tuple(3, 4.5));
     BOOST_TEST(s[2] == std::tuple(6, 7.8));
 }
+
+BOOST_AUTO_TEST_CASE(iterator) {
+    auto s = soa::soa<int, double>{};
+
+    auto b = s.begin();
+    auto e = s.end();
+}

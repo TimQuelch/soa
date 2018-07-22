@@ -73,20 +73,28 @@ namespace soa {
             tuple_apply([this](auto... Is) { (std::get<Is>(vecs_).pop_back(), ...); });
         }
 
-        auto begin() const {
-            return tuple_apply([this](auto... Is) { return iterator{vecs_[Is].begin()...}; });
+        auto begin() {
+            return tuple_apply(
+                [this](auto... Is) { return iterator{std::get<Is>(vecs_).begin()...}; });
         }
+
+        auto begin() const { return cbegin(); }
 
         auto cbegin() const {
-            return tuple_apply([this](auto... Is) { return const_iterator{vecs_[Is].begin()...}; });
+            return tuple_apply(
+                [this](auto... Is) { return const_iterator{std::get<Is>(vecs_).begin()...}; });
         }
 
-        auto end() const {
-            return tuple_apply([this](auto... Is) { return iterator{vecs_[Is].end()...}; });
+        auto end() {
+            return tuple_apply(
+                [this](auto... Is) { return iterator{std::get<Is>(vecs_).end()...}; });
         }
+
+        auto end() const { return cend(); }
 
         auto cend() const {
-            return tuple_apply([this](auto... Is) { return const_iterator{vecs_[Is].end()...}; });
+            return tuple_apply(
+                [this](auto... Is) { return const_iterator{std::get<Is>(vecs_).end()...}; });
         }
 
     private:
@@ -113,8 +121,13 @@ namespace soa {
             using reference =
                 std::conditional_t<Const, soa<Ts...>::const_reference, soa<Ts...>::reference>;
 
-            iterator_impl(vec_iterators its)
-                : its_{std::move(its)} {}
+            template <bool Const_ = Const, typename = std::enable_if_t<Const_>>
+            iterator_impl(typename std::vector<Ts>::const_iterator... its)
+                : its_{std::move(its)...} {}
+
+            template <bool Const_ = Const, typename = std::enable_if_t<!Const_>>
+            iterator_impl(typename std::vector<Ts>::iterator... its)
+                : its_{std::move(its)...} {}
 
             template <bool Const_>
             iterator_impl(iterator_impl<Const_> other)
