@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(soa VERSION 0.1.0 LANGUAGES CXX)
 
+# Boost header dependencies
+find_package(Boost REQUIRED)
+
 # Add library target
 add_library(soa INTERFACE)
 add_library(soa::soa ALIAS soa)
@@ -12,6 +15,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>  
     $<INSTALL_INTERFACE:include/>)
 target_compile_features(soa INTERFACE cxx_std_17)
+target_link_libraries(soa INTERFACE Boost::boost)
 
 # Add tests
 enable_testing()
