@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(soa VERSION 0.1.0 LANGUAGES CXX)
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
+
 # Boost header dependencies
 find_package(Boost REQUIRED)
 
@@ -20,6 +22,9 @@ target_link_libraries(soa INTERFACE Boost::boost)
 # Add tests
 enable_testing()
 add_subdirectory(test)
+
+# Add benchmarks
+add_subdirectory(benchmark)
 
 # Install
 include(GNUInstallDirs)
