@@ -113,11 +113,6 @@ namespace soa {
                                             std::conditional_t<Const, const_reference, reference>,
                                             difference_type> {
         public:
-            using vec_iterators =
-                std::conditional_t<Const,
-                                   std::tuple<typename std::vector<Ts>::const_iterator...>,
-                                   std::tuple<typename std::vector<Ts>::iterator...>>;
-
             using reference =
                 std::conditional_t<Const, soa<Ts...>::const_reference, soa<Ts...>::reference>;
 
@@ -166,6 +161,11 @@ namespace soa {
             bool equal(const iterator_impl<Const_>& other) const {
                 return std::get<0>(its_) == std::get<0>(other.its_);
             }
+
+            using vec_iterators =
+                std::conditional_t<Const,
+                                   std::tuple<typename std::vector<Ts>::const_iterator...>,
+                                   std::tuple<typename std::vector<Ts>::iterator...>>;
 
             vec_iterators its_ = {};
         };
