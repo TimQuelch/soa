@@ -136,6 +136,9 @@ namespace soa {
             iterator_impl() = default;
 
         private:
+            friend class boost::iterator_core_access;
+            friend class iterator_impl<!Const>;
+
             reference dereference() const {
                 return soa<Ts...>::tuple_apply(
                     [this](auto... Is) { return reference{*std::get<Is>(its_)...}; });
