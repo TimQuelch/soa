@@ -32,6 +32,9 @@ namespace soa {
         using iterator = iterator_impl<false>;
         using const_iterator = iterator_impl<true>;
 
+        static_assert(std::is_swappable_v<reference>);
+        static_assert(std::is_swappable_v<std::add_rvalue_reference_t<reference>>);
+
         template <size_type I>
         auto& get() {
             return std::get<I>(vecs_);
@@ -95,6 +98,10 @@ namespace soa {
         auto cend() const {
             return tuple_apply(
                 [this](auto... Is) { return const_iterator{std::get<Is>(vecs_).end()...}; });
+        }
+
+        static void swap(reference& a, reference& b) {
+            tuple_apply([&](auto... Is) { (std::swap(std::get<Is>(a), std::get<Is>(b)), ...); });
         }
 
     private:
